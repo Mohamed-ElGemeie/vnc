@@ -1,6 +1,9 @@
 import BlynkLib
 import RPi.GPIO as GPIO
 from BlynkTimer import BlynkTimer
+from time import sleep
+import time
+
 BLYNK_TEMPLATE_ID =  "TMPL2pDOJJph8"
 BLYNK_TEMPLATE_NAME =  "New Template"
 BLYNK_AUTH_TOKEN =  "iqncuc3ILPdRvwPFLDs7W4IZcbq2PWle"
@@ -22,33 +25,40 @@ GPIO.setup(buzzer, GPIO.OUT)
 # Initialize Blynk
 blynk = BlynkLib.Blynk(BLYNK_AUTH_TOKEN)
 
-# Led control through V0 virtual pin
-@blynk.on("V0")
-def v0_write_handler(value):
-    if int(value[0]) is not 0:
-        GPIO.output(led1, GPIO.HIGH)
-        print('LED1 HIGH')
-    else:
-        GPIO.output(led1, GPIO.LOW)
-        print('LED1 LOW')
 
-# Led control through V0 virtual pin
-@blynk.on("V1")
-def v1_write_handler(value):
-#    global led_switch
-    if int(value[0]) is not 0:
-        GPIO.output(led2, GPIO.HIGH)
-        print('LED2 HIGH')
-    else:
-        GPIO.output(led2, GPIO.LOW)
-        print('LED2 LOW')
+def measure_light_intensity():
+    light_value = GPIO.input(light)
+    blynk.virtual_write(1, light_value) 
+    print("Light Value:", light_value)
+    return light_value
+
+def measure_motion_intensity():
+    motion_value = GPIO.input(motion)
+    blynk.virtual_write(0, motion_value) 
+    print("Motion Value:", motion_value)
+    return motion_value
+
 
 #function to sync the data from virtual pins
 @blynk.on("connected")
 def blynk_connected():
     print("Raspberry Pi Connected to New Blynk") 
 
+start = time.time()
+
 while True:
     blynk.run()
+    safe = True
+    if(start - time.time()>2.5):
+        start=time.time()
+        light_value = measure_light_intensity()
+        motion_value  = measure_motion_intensity()
+        if (light_value > 500 or motion_value == GPIO.HIGH):
+            safe = False
+        else:
+            safe=True
+    if(not safe):
+        GPIO.output(pin1, GPIO.HIGH)    
+        GPIO.output(pin2, GPIO.HIGH)
 
     
