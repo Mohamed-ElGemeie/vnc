@@ -58,7 +58,19 @@ while True:
         else:
             safe=True
     if(not safe):
+        sleep(0.2)
         GPIO.output(pin1, GPIO.HIGH)    
         GPIO.output(pin2, GPIO.HIGH)
+        GPIO.output(buzzer, GPIO.HIGH)
+        sleep(0.2)
+        GPIO.output(pin1, GPIO.LOW)    
+        GPIO.output(pin2, GPIO.LOW)
+        GPIO.output(buzzer, GPIO.LOW)
+
+    else:
+        GPIO.output(pin1, GPIO.LOW)    
+        GPIO.output(pin2, GPIO.LOW)
+        GPIO.output(buzzer, GPIO.LOW)
+
 
     
